@@ -9,7 +9,6 @@
 "use strict";
 // MongoDb && Mongoose
 require("dotenv").config();
-require("mongodb");
 const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
@@ -32,26 +31,26 @@ module.exports = function (app) {
 
       Book.find({}, function (err, docsArr) {
         if (err) {
-          res.send("No book found !");
+          res.json(["No book found !"]);
           return;
         }
 
         const Books = docsArr.reduce((accu, current) => {
           const obj = {};
           obj.title = current.title;
-          obj.id = current._id;
+          obj._id = current._id;
           obj.commentcount = current.comments.length;
           accu.push(obj);
           return accu;
         }, []);
-        res.json({ Books });
+        res.json(Books);
       });
     })
 
     .post(function (req, res) {
       let title = req.body.title;
 
-      if (!title) {
+      if (!req.body.title || req.body.title == undefined) {
         res.send("missing required field title");
         return;
       }
@@ -66,6 +65,7 @@ module.exports = function (app) {
           title: doc.title,
           _id: doc._id,
         });
+        return;// console.log(doc.title + " - created !");
       });
     })
 
@@ -88,7 +88,7 @@ module.exports = function (app) {
       let bookid = req.params.id;
       //json res format: {"_id": bookid, "title": book_title, "comments": [comment,comment,...]}
 
-      Book.findOneById(bookid)
+      Book.findOne({ _id: bookid })
         .select("_id title comments")
         .exec((err, book) => {
           if (err) {
@@ -104,15 +104,17 @@ module.exports = function (app) {
     .post(function (req, res) {
       let bookid = req.params.id;
       let comment = req.body.comment;
+      console.log(bookid, comment);
 
-      if (!comment) {
+      if (!comment || comment == undefined) {
         res.send("missing required field comment");
-        return;
+        return console.log("no comment !");
       }
 
-      Book.findOneAndUpdate(bookid, function (err, book) {
+      Book.findOne({ _id: bookid }, function (err, book) {
         if (err) {
           res.send("no book exists");
+          return console.log("no book exists");
         }
 
         book.comments.push(comment);
@@ -125,7 +127,7 @@ module.exports = function (app) {
             _id: updatedDoc._id,
             comments: updatedDoc.comments,
           });
-          return;
+          return console.log(updatedDoc.title + " - updated !");
         });
       });
     })
