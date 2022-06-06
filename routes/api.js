@@ -65,7 +65,7 @@ module.exports = function (app) {
           title: doc.title,
           _id: doc._id,
         });
-        return;// console.log(doc.title + " - created !");
+        return; // console.log(doc.title + " - created !");
       });
     })
 
@@ -74,11 +74,11 @@ module.exports = function (app) {
       Book.deleteMany({}, (err, result) => {
         if (err) {
           res.send("Failed to drop the Books database !");
-          return console.log("Failed to drop the Books database !");
+          return;
         }
 
         res.send("complete delete successful");
-        return console.log(result);
+        return;
       });
     });
 
@@ -90,13 +90,13 @@ module.exports = function (app) {
 
       Book.findOne({ _id: bookid })
         .select("_id title comments")
-        .exec((err, book) => {
-          if (err) {
+        .exec((err, doc) => {
+          if (err || doc == null) {
             res.send("no book exists");
             return;
           }
 
-          res.json(book);
+          res.json(doc);
           return;
         });
     })
@@ -104,30 +104,29 @@ module.exports = function (app) {
     .post(function (req, res) {
       let bookid = req.params.id;
       let comment = req.body.comment;
-      console.log(bookid, comment);
 
       if (!comment || comment == undefined) {
         res.send("missing required field comment");
-        return console.log("no comment !");
+        return;
       }
 
       Book.findOne({ _id: bookid }, function (err, book) {
-        if (err) {
+        if (err || book == null) {
           res.send("no book exists");
-          return console.log("no book exists");
+          return;
         }
 
         book.comments.push(comment);
         book.save(function (err, updatedDoc) {
           if (err) {
-            return console.log("Error occured while saving the updated Book");
+            return;
           }
           res.json({
             title: updatedDoc.title,
             _id: updatedDoc._id,
             comments: updatedDoc.comments,
           });
-          return console.log(updatedDoc.title + " - updated !");
+          return;
         });
       });
     })
@@ -137,13 +136,13 @@ module.exports = function (app) {
       //if successful response will be 'delete successful'
 
       Book.deleteOne({ _id: bookid }, (err, result) => {
-        if (err) {
+        if (err || result.deletedCount == 0) {
           res.send("no book exists");
-          return console.log("No Book Found !");
+          return;
         }
 
         res.send("delete successful");
-        return console.log(result);
+        return;
       });
     });
 };
