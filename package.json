@@ -5,7 +5,8 @@
 	"main": "server.js",
 	"scripts": {
 		"start": "node server.js",
-		"test": "mocha --timeout 10000 --recursive --exit --ui tdd tests/"
+		"test": "mocha --timeout 10000 --recursive --exit --ui tdd tests/",
+		"dev": "nodemon server.js"
 	},
 	"dependencies": {
 		"body-parser": "^1.15.2",
@@ -28,5 +29,8 @@
 		"hyperdev",
 		"express"
 	],
-	"license": "MIT"
+	"license": "MIT",
+	"devDependencies": {
+		"nodemon": "^2.0.16"
+	}
 }

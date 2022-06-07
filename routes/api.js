@@ -17,7 +17,8 @@ mongoose.connect(process.env.MONGO_URI, {
   useUnifiedTopology: true,
 });
 const bookSchema = new Schema({
-  title: String,
+  _id: ObjectId,
+  title: {type: String, required: true},
   comments: [String],
 });
 const Book = mongoose.model("Book", bookSchema);
@@ -49,6 +50,7 @@ module.exports = function (app) {
 
     .post(function (req, res) {
       let title = req.body.title;
+      const _id = req.body._id || ObjectId();
 
       if (!req.body.title || req.body.title == undefined) {
         res.send("missing required field title");
@@ -57,6 +59,7 @@ module.exports = function (app) {
 
       // Creating and saving the Book from the posted title
       const book = new Book({
+        _id: _id,
         title: title,
         comments: [],
       }).save(function (err, doc) {
@@ -110,14 +113,14 @@ module.exports = function (app) {
         return;
       }
 
-      Book.findOne({ _id: bookid }, function (err, book) {
+      Book.findOne({ _id: ObjectId(bookid) }, function (err, book) { //*************** */
         if (err || book == null) {
           res.send("no book exists");
           return;
         }
-
+ 
         book.comments.push(comment);
-        book.save(function (err, updatedDoc) {
+        book.save(function (err, updatedDoc) { 
           if (err) {
             return;
           }
